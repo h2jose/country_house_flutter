@@ -11,6 +11,7 @@ class AllCountries  extends StatefulWidget{
 
 class _AllCountriesState extends State<AllCountries> {
   List countries = [];
+  List filteredCountries = [];
   bool isSearching = false;
   getCountries() async {
     try {
@@ -25,14 +26,16 @@ class _AllCountriesState extends State<AllCountries> {
   void initState() {
     getCountries().then((data){
       setState(() {
-        countries = data;
+        countries = filteredCountries = data;
       });
     });
     super.initState();
   }
 
   void _filterCountries(String value) {
-    print(value);  
+    setState(() {
+      filteredCountries = countries.where((c)=>c['name'].toLowerCase().contains(value.toLowerCase())).toList();
+    });    
   }
 
   @override
@@ -60,6 +63,7 @@ class _AllCountriesState extends State<AllCountries> {
                 onPressed: (){
                   setState(() {
                     this.isSearching = false;
+                    this.filteredCountries = countries;
                   });
                 }
               )
@@ -75,14 +79,14 @@ class _AllCountriesState extends State<AllCountries> {
       ),
       body: Container(
         padding: EdgeInsets.all(8.0),
-        child: countries.length>0 ? ListView.builder(
-          itemCount: countries.length,
+        child: filteredCountries.length>0 ? ListView.builder(
+          itemCount: filteredCountries.length,
           itemBuilder: (BuildContext context, int index){
             return GestureDetector(
                     onTap: (){
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) =>  Country(countries[index])
+                            builder: (context) =>  Country(filteredCountries[index])
                         ),
                       );
                     },
@@ -90,7 +94,7 @@ class _AllCountriesState extends State<AllCountries> {
                         elevation: 10.0,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal:8.0),
-                          child: Text(countries[index]['name'], style: TextStyle(fontSize: 18),),
+                          child: Text(filteredCountries[index]['name'], style: TextStyle(fontSize: 18),),
                         )
                     )
                 );
